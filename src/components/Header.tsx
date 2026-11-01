@@ -34,7 +34,15 @@ export const Header: React.FC<HeaderProps> = ({
   const [showQuickActions, setShowQuickActions] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const [showVercelSetup, setShowVercelSetup] = useState(false);
+  const [copiedCmd, setCopiedCmd] = useState<string | null>(null);
   const t = TRANSLATIONS[lang];
+
+  const copyToClipboard = (text: string, label: string) => {
+    navigator.clipboard.writeText(text);
+    setCopiedCmd(label);
+    setTimeout(() => setCopiedCmd(null), 2000);
+  };
 
   return (
     <header className="h-16 bg-white border-b border-slate-200 px-6 flex items-center justify-between sticky top-0 z-20">
@@ -45,13 +53,17 @@ export const Header: React.FC<HeaderProps> = ({
           <span>Elm & Claude OCR Active</span>
         </div>
 
-        {/* Vercel Status Badge */}
-        <div className="hidden md:flex items-center gap-1.5 text-[11px] font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200/80 px-2.5 py-1.5 rounded-md transition-colors cursor-pointer" title="Vercel deployment configuration active (vercel.json configured)">
+        {/* Vercel Status Badge Button */}
+        <button
+          onClick={() => setShowVercelSetup(true)}
+          className="hidden md:flex items-center gap-1.5 text-[11px] font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200/90 px-2.5 py-1.5 rounded-md transition-all cursor-pointer ring-1 ring-slate-200"
+          title="Click to view Vercel deployment setup & CLI status"
+        >
           <svg className="w-3 h-3 fill-current text-black" viewBox="0 0 24 24">
             <path d="M24 22.525H0l12-21.05 12 21.05z" />
           </svg>
           <span>Vercel Deploy Ready</span>
-        </div>
+        </button>
       </div>
 
       {/* Right controls */}
@@ -282,6 +294,122 @@ export const Header: React.FC<HeaderProps> = ({
           )}
         </div>
       </div>
+
+      {/* Vercel Setup & Deployment Modal */}
+      {showVercelSetup && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full border border-slate-200 overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+            {/* Modal Header */}
+            <div className="p-4 bg-slate-900 text-white flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-lg bg-black border border-white/20 flex items-center justify-center">
+                  <svg className="w-4 h-4 fill-current text-white" viewBox="0 0 24 24">
+                    <path d="M24 22.525H0l12-21.05 12 21.05z" />
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold flex items-center gap-2">
+                    Vercel Setup & Deployment
+                    <span className="text-[10px] bg-emerald-500/20 text-emerald-300 font-mono px-2 py-0.5 rounded-full border border-emerald-500/30">
+                      Configured
+                    </span>
+                  </h3>
+                  <p className="text-[11px] text-slate-400">
+                    Production configuration & CLI deployment ready
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowVercelSetup(false)}
+                className="text-slate-400 hover:text-white p-1 rounded-md"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Modal Content */}
+            <div className="p-5 space-y-4 text-xs text-slate-700">
+              {/* Checklist */}
+              <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-2">
+                <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">
+                  Vercel Setup Checklist
+                </span>
+                <div className="space-y-1.5">
+                  <div className="flex items-center gap-2 text-emerald-700 font-medium">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                    <span>vercel.json created with SPA rewrites & asset caching headers</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-emerald-700 font-medium">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                    <span>vercel CLI installed in devDependencies (^65.9.0)</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-emerald-700 font-medium">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                    <span>@vercel/analytics package installed & mounted in main.tsx</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-emerald-700 font-medium">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                    <span>NPM scripts configured: "vercel-build", "deploy", "deploy:preview"</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Deployment Commands */}
+              <div className="space-y-2">
+                <span className="font-semibold text-slate-800">Deployment Commands</span>
+
+                <div className="space-y-2 font-mono text-[11px]">
+                  <div className="p-2.5 bg-slate-900 text-slate-100 rounded-xl flex items-center justify-between border border-slate-800">
+                    <div>
+                      <span className="text-slate-500"># Deploy to Production</span>
+                      <p className="text-emerald-400 font-bold">npx vercel --prod</p>
+                    </div>
+                    <button
+                      onClick={() => copyToClipboard('npx vercel --prod', 'prod')}
+                      className="px-2.5 py-1 bg-white/10 hover:bg-white/20 text-white rounded text-[10px] font-sans font-medium transition-colors"
+                    >
+                      {copiedCmd === 'prod' ? 'Copied!' : 'Copy'}
+                    </button>
+                  </div>
+
+                  <div className="p-2.5 bg-slate-900 text-slate-100 rounded-xl flex items-center justify-between border border-slate-800">
+                    <div>
+                      <span className="text-slate-500"># Deploy to Preview</span>
+                      <p className="text-blue-400 font-bold">npx vercel</p>
+                    </div>
+                    <button
+                      onClick={() => copyToClipboard('npx vercel', 'preview')}
+                      className="px-2.5 py-1 bg-white/10 hover:bg-white/20 text-white rounded text-[10px] font-sans font-medium transition-colors"
+                    >
+                      {copiedCmd === 'preview' ? 'Copied!' : 'Copy'}
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* GitHub / Git Integration Note */}
+              <div className="p-3 bg-blue-50 border border-blue-200 rounded-xl text-blue-900 space-y-1">
+                <span className="font-bold flex items-center gap-1.5">
+                  <span>Git Integration (Recommended)</span>
+                </span>
+                <p className="text-[11px] leading-relaxed text-blue-800">
+                  Import this repository into your Vercel Dashboard (vercel.com/new). Vercel will automatically detect Vite, use <code className="font-mono bg-blue-100 px-1 rounded">npm run build</code>, and deploy on every git push.
+                </p>
+              </div>
+            </div>
+
+            {/* Modal Footer */}
+            <div className="p-3 bg-slate-50 border-t border-slate-200 flex justify-end">
+              <button
+                onClick={() => setShowVercelSetup(false)}
+                className="px-4 py-1.5 bg-slate-900 hover:bg-black text-white rounded-lg text-xs font-semibold"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </header>
   );
 };
