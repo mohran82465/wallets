@@ -1,0 +1,6 @@
+{
+  "name": "Mudabbir Wallets - Shomoos & Claude Operations",
+  "description": "Comprehensive wallet management mockup for Mudabbir by Durrat: Shomoos integration balances, Claude AI ID capture usage, live transaction ledger, and top-up financial audit.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
