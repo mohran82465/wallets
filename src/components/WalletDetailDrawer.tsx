@@ -27,7 +27,7 @@ interface WalletDetailDrawerProps {
   lang: Language;
   onClose: () => void;
   onTopUp: (wallet: Wallet) => void;
-  onSimulate: (wallet: Wallet) => void;
+  onSimulate?: (wallet: Wallet) => void;
   onInitiateReversal: (wallet: Wallet) => void;
 }
 
@@ -114,26 +114,19 @@ export const WalletDetailDrawer: React.FC<WalletDetailDrawerProps> = ({
           <div className="flex items-center gap-2.5">
             <button
               onClick={() => onTopUp(wallet)}
-              className="flex-1 flex items-center justify-center gap-2 py-2 px-3 bg-[#0b3824] hover:bg-[#124930] text-white rounded-xl text-xs font-semibold shadow-xs transition-colors"
+              className="flex-1 flex items-center justify-center gap-2 py-2.5 px-4 bg-[#0b3824] hover:bg-[#124930] text-white rounded-xl text-xs font-semibold shadow-xs transition-colors"
             >
               <PlusCircle className="w-4 h-4 text-emerald-300" />
               <span>{t.top_up_wallet}</span>
             </button>
 
             <button
-              onClick={() => onSimulate(wallet)}
-              className="flex-1 flex items-center justify-center gap-2 py-2 px-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-semibold shadow-xs transition-colors"
-            >
-              <Zap className="w-4 h-4 text-amber-300" />
-              <span>{t.run_simulation}</span>
-            </button>
-
-            <button
               onClick={() => onInitiateReversal(wallet)}
-              className="py-2 px-3 border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-xl text-xs font-medium transition-colors"
+              className="py-2.5 px-4 border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-xl text-xs font-medium transition-colors flex items-center gap-1.5"
               title="Manual adjustment or reversal"
             >
               <RotateCcw className="w-3.5 h-3.5" />
+              <span>Adjustment</span>
             </button>
           </div>
 

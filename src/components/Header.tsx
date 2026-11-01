@@ -20,7 +20,7 @@ interface HeaderProps {
   lang: Language;
   onToggleLang: () => void;
   onOpenQuickTopUp: () => void;
-  onOpenSimulation: () => void;
+  onOpenSimulation?: () => void;
   onOpenAuditTab: () => void;
 }
 
@@ -46,25 +46,7 @@ export const Header: React.FC<HeaderProps> = ({
 
   return (
     <header className="h-16 bg-white border-b border-slate-200 px-6 flex items-center justify-between sticky top-0 z-20">
-      {/* Left side empty or search indicator */}
-      <div className="flex items-center gap-2.5">
-        <div className="hidden sm:flex items-center gap-2 text-xs font-medium text-slate-600 bg-slate-100 px-3 py-1.5 rounded-md">
-          <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
-          <span>Elm & Claude OCR Active</span>
-        </div>
-
-        {/* Vercel Status Badge Button */}
-        <button
-          onClick={() => setShowVercelSetup(true)}
-          className="hidden md:flex items-center gap-1.5 text-[11px] font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200/90 px-2.5 py-1.5 rounded-md transition-all cursor-pointer ring-1 ring-slate-200"
-          title="Click to view Vercel deployment setup & CLI status"
-        >
-          <svg className="w-3 h-3 fill-current text-black" viewBox="0 0 24 24">
-            <path d="M24 22.525H0l12-21.05 12 21.05z" />
-          </svg>
-          <span>Vercel Deploy Ready</span>
-        </button>
-      </div>
+    
 
       {/* Right controls */}
       <div className="flex items-center gap-3">
@@ -107,19 +89,6 @@ export const Header: React.FC<HeaderProps> = ({
                   </div>
                 </button>
 
-                <button
-                  onClick={() => {
-                    setShowQuickActions(false);
-                    onOpenSimulation();
-                  }}
-                  className="w-full text-left px-3 py-2 text-xs text-slate-700 hover:bg-emerald-50 hover:text-emerald-800 rounded-lg flex items-center gap-2.5 transition-colors"
-                >
-                  <Scan className="w-4 h-4 text-emerald-600" />
-                  <div>
-                    <p className="font-medium">Test Live Shomoos / Claude Scan</p>
-                    <p className="text-[10px] text-slate-400">Elm gateway & OCR extractor</p>
-                  </div>
-                </button>
 
                 <button
                   onClick={() => {

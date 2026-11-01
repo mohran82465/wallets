@@ -9,7 +9,7 @@ interface WalletTableProps {
   lang: Language;
   onSelectWallet: (wallet: Wallet) => void;
   onTopUpWallet: (wallet: Wallet) => void;
-  onSimulateWallet: (wallet: Wallet) => void;
+  onSimulateWallet?: (wallet: Wallet) => void;
 }
 
 export const WalletTable: React.FC<WalletTableProps> = ({
@@ -216,20 +216,13 @@ export const WalletTable: React.FC<WalletTableProps> = ({
 
                   {/* Actions */}
                   <td className="py-3.5 px-4 text-center">
-                    <div className="flex items-center justify-center gap-1.5 opacity-90 group-hover:opacity-100">
+                    <div className="flex items-center justify-center opacity-90 group-hover:opacity-100">
                       <button
                         onClick={() => onTopUpWallet(wallet)}
                         className="p-1.5 text-emerald-700 bg-emerald-50 hover:bg-emerald-100 rounded-md transition-colors"
                         title={t.top_up_btn}
                       >
                         <PlusCircle className="w-3.5 h-3.5" />
-                      </button>
-                      <button
-                        onClick={() => onSimulateWallet(wallet)}
-                        className="p-1.5 text-blue-700 bg-blue-50 hover:bg-blue-100 rounded-md transition-colors"
-                        title={t.simulate_btn}
-                      >
-                        <Zap className="w-3.5 h-3.5" />
                       </button>
                     </div>
                   </td>

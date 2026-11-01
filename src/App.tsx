@@ -225,7 +225,6 @@ export default function App() {
           lang={lang}
           onToggleLang={() => setLang(lang === 'en' ? 'ar' : 'en')}
           onOpenQuickTopUp={() => handleOpenTopUp()}
-          onOpenSimulation={() => handleOpenSimulate()}
           onOpenAuditTab={() => setActiveTab('audit')}
         />
 
@@ -246,57 +245,16 @@ export default function App() {
             </span>
           </nav>
 
-          {/* Page Heading & Service Switcher Pills */}
-          <div className="flex flex-wrap items-center justify-between gap-4">
-            <div>
-              <h1 className="text-2xl font-bold tracking-tight text-slate-900">
-                {t.wallets}
-              </h1>
-              <p className="text-xs text-slate-500 mt-0.5">
-                {currentWalletType === 'shomoos'
-                  ? 'Shomoos Elm regulatory guest registration balances and submission health'
-                  : currentWalletType === 'claude'
-                  ? 'Claude Vision ID Capture OCR token consumption and estimated capture capacity'
-                  : 'Vercel Edge Network hosting, fast data transfer, and serverless guest portal quotas'}
-              </p>
-            </div>
-
-            {/* Service Quick Switch Pills */}
-            <div className="flex items-center gap-1.5 bg-slate-200/70 p-1 rounded-xl text-xs font-semibold">
-              <button
-                onClick={() => setCurrentWalletType('shomoos')}
-                className={`px-3 py-1.5 rounded-lg transition-all ${
-                  currentWalletType === 'shomoos'
-                    ? 'bg-white text-[#0b3824] shadow-xs font-bold'
-                    : 'text-slate-600 hover:text-slate-900'
-                }`}
-              >
-                🇸🇦 Shomoos
-              </button>
-              <button
-                onClick={() => setCurrentWalletType('claude')}
-                className={`px-3 py-1.5 rounded-lg transition-all ${
-                  currentWalletType === 'claude'
-                    ? 'bg-white text-[#0b3824] shadow-xs font-bold'
-                    : 'text-slate-600 hover:text-slate-900'
-                }`}
-              >
-                ⚡ Claude OCR
-              </button>
-              <button
-                onClick={() => setCurrentWalletType('vercel')}
-                className={`px-3 py-1.5 rounded-lg transition-all flex items-center gap-1.5 ${
-                  currentWalletType === 'vercel'
-                    ? 'bg-white text-[#0b3824] shadow-xs font-bold'
-                    : 'text-slate-600 hover:text-slate-900'
-                }`}
-              >
-                <svg className="w-2.5 h-2.5 fill-current" viewBox="0 0 24 24">
-                  <path d="M24 22.525H0l12-21.05 12 21.05z" />
-                </svg>
-                <span>Vercel Edge</span>
-              </button>
-            </div>
+          {/* Page Heading matching reference screenshot */}
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight text-slate-900">
+              {t.wallets}
+            </h1>
+            <p className="text-xs text-slate-500 mt-0.5">
+              {currentWalletType === 'shomoos'
+                ? 'Shomoos Elm regulatory guest registration balances and submission health'
+                : 'Claude Vision ID Capture OCR token consumption and estimated capture capacity'}
+            </p>
           </div>
 
           {/* Navigation Tabs (Wallets, Transactions, Audit) */}
@@ -351,7 +309,7 @@ export default function App() {
               </button>
             </div>
 
-            {/* Quick action buttons on right of tabs */}
+            {/* Quick top-up button */}
             <div className="hidden sm:flex items-center gap-2 pb-2">
               <button
                 onClick={() => handleOpenTopUp()}
@@ -359,14 +317,6 @@ export default function App() {
               >
                 <Plus className="w-3.5 h-3.5" />
                 <span>Top-Up Wallet</span>
-              </button>
-
-              <button
-                onClick={() => handleOpenSimulate()}
-                className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-lg shadow-xs transition-colors"
-              >
-                <Zap className="w-3.5 h-3.5 text-amber-300" />
-                <span>Test Live Operation</span>
               </button>
             </div>
           </div>
@@ -450,7 +400,6 @@ export default function App() {
                 lang={lang}
                 onSelectWallet={(wallet) => setSelectedWalletForDetail(wallet)}
                 onTopUpWallet={(wallet) => handleOpenTopUp(wallet)}
-                onSimulateWallet={(wallet) => handleOpenSimulate(wallet)}
               />
             </div>
           )}
@@ -478,7 +427,6 @@ export default function App() {
         lang={lang}
         onClose={() => setSelectedWalletForDetail(null)}
         onTopUp={(w) => handleOpenTopUp(w)}
-        onSimulate={(w) => handleOpenSimulate(w)}
         onInitiateReversal={(w) => handleOpenAdjustment(w)}
       />
 

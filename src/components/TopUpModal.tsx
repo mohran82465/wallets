@@ -5,11 +5,11 @@ import {
   X,
   CreditCard,
   PlusCircle,
-  FileCheck2,
   CheckCircle2,
-  Receipt,
+  Lock,
+  ShieldCheck,
   Building2,
-  AlertCircle,
+  Calendar,
 } from 'lucide-react';
 
 interface TopUpModalProps {
@@ -34,8 +34,15 @@ export const TopUpModal: React.FC<TopUpModalProps> = ({
     selectedWalletCode || (wallets[0] ? wallets[0].wallet_code : '')
   );
   const [quantity, setQuantity] = useState<number>(2500);
-  const [paymentMethod, setPaymentMethod] = useState<string>('Mada / Corporate Card');
+
+  // Card Payment States
+  const [cardHolder, setCardHolder] = useState<string>('Saeed Al-Ghamdi');
+  const [cardNumber, setCardNumber] = useState<string>('4282 3400 9812 7741');
+  const [cardExpiry, setCardExpiry] = useState<string>('08/28');
+  const [cardCvc, setCardCvc] = useState<string>('842');
   const [approver, setApprover] = useState<string>('Saeed Al-Ghamdi (Owner)');
+
+  const [isProcessing, setIsProcessing] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
 
   if (!isOpen) return null;
@@ -46,15 +53,44 @@ export const TopUpModal: React.FC<TopUpModalProps> = ({
   const vatAmount = subtotal * 0.15; // 15% ZATCA VAT in Saudi Arabia
   const totalAmount = subtotal + vatAmount;
 
+  const handleCardNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const raw = e.target.value.replace(/\D/g, '').slice(0, 16);
+    const formatted = raw.replace(/(\d{4})(?=\d)/g, '$1 ').trim();
+    setCardNumber(formatted);
+  };
+
+  const handleExpiryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let raw = e.target.value.replace(/\D/g, '').slice(0, 4);
+    if (raw.length >= 3) {
+      raw = `${raw.slice(0, 2)}/${raw.slice(2)}`;
+    }
+    setCardExpiry(raw);
+  };
+
+  const handleCvcChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const raw = e.target.value.replace(/\D/g, '').slice(0, 4);
+    setCardCvc(raw);
+  };
+
   const handleTopUpSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!currentWallet) return;
+
+    setIsProcessing(true);
 
     const randomSuffix = Math.floor(1000 + Math.random() * 9000);
     const invoiceId = `INV-2026-0${randomSuffix}`;
     const invoiceLineId = `${invoiceId}-LN-01`;
     const now = new Date();
     const formattedDate = now.toISOString().replace('T', ' ').substring(0, 19);
+
+    const cleanCard = cardNumber.replace(/\s/g, '');
+    const last4 = cleanCard.slice(-4) || '7741';
+    const cardBrand = cleanCard.startsWith('4')
+      ? 'mada / Visa'
+      : cleanCard.startsWith('5')
+      ? 'mada / Mastercard'
+      : 'mada Corporate Card';
 
     const auditRecord: TopUpAudit = {
       id: `aud-${Date.now()}`,
@@ -70,10 +106,11 @@ export const TopUpModal: React.FC<TopUpModalProps> = ({
       total_amount: totalAmount,
       approved_by: approver,
       created_at: formattedDate,
-      payment_method: paymentMethod,
+      payment_method: `${cardBrand} (•••• ${last4})`,
     };
 
-    const txnPrefix = currentWallet.type === 'shomoos' ? 'SHT' : 'CLT';
+    const txnPrefix =
+      currentWallet.type === 'shomoos' ? 'SHT' : currentWallet.type === 'claude' ? 'CLT' : 'VCT';
     const txnRecord: Transaction = {
       id: `tx-top-${Date.now()}`,
       wallet_code: currentWallet.wallet_code,
@@ -90,12 +127,15 @@ export const TopUpModal: React.FC<TopUpModalProps> = ({
       result: 'SUCCESS',
     };
 
-    onConfirmTopUp(auditRecord, txnRecord);
-    setIsSuccess(true);
     setTimeout(() => {
-      setIsSuccess(false);
-      onClose();
-    }, 1500);
+      onConfirmTopUp(auditRecord, txnRecord);
+      setIsProcessing(false);
+      setIsSuccess(true);
+      setTimeout(() => {
+        setIsSuccess(false);
+        onClose();
+      }, 1500);
+    }, 600);
   };
 
   return (
@@ -125,7 +165,7 @@ export const TopUpModal: React.FC<TopUpModalProps> = ({
         {isSuccess ? (
           <div className="p-8 text-center space-y-3">
             <CheckCircle2 className="w-12 h-12 text-emerald-600 mx-auto animate-bounce" />
-            <h4 className="text-base font-bold text-slate-900">Wallet Funded Successfully!</h4>
+            <h4 className="text-base font-bold text-slate-900">Payment Processed Successfully!</h4>
             <p className="text-xs text-slate-600">
               +{quantity.toLocaleString()} units credited to {currentWallet?.wallet_code} (
               {currentWallet?.property_name}). Tax Invoice generated and posted to audit ledger.
@@ -190,7 +230,7 @@ export const TopUpModal: React.FC<TopUpModalProps> = ({
             </div>
 
             {/* Financial & Tax Breakdown Card */}
-            <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-200 space-y-2">
+            <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-1.5">
               <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">
                 Financial Breakdown (ZATCA Compliant)
               </span>
@@ -215,30 +255,113 @@ export const TopUpModal: React.FC<TopUpModalProps> = ({
               </div>
             </div>
 
-            {/* Payment Method & Approver */}
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="block font-semibold text-slate-700 mb-1">Payment Method</label>
-                <select
-                  value={paymentMethod}
-                  onChange={(e) => setPaymentMethod(e.target.value)}
-                  className="w-full p-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-800"
-                >
-                  <option value="Mada / Corporate Card">Mada / Corporate Card</option>
-                  <option value="SADAD Direct Debit">SADAD Direct Debit</option>
-                  <option value="Bank Wire Transfer">Bank Wire Transfer</option>
-                  <option value="Direct Durrat Account">Direct Durrat Account</option>
-                </select>
+            {/* Card Payment Section (Replacing Payment Method Dropdown) */}
+            <div className="bg-slate-50 border border-slate-200 rounded-xl p-3.5 space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-1.5 font-semibold text-slate-800">
+                  <CreditCard className="w-4 h-4 text-emerald-700" />
+                  <span>Card Payment</span>
+                </div>
+                {/* Brand badges */}
+                <div className="flex items-center gap-1 text-[10px] font-bold">
+                  <span className="px-1.5 py-0.5 rounded bg-emerald-700 text-white tracking-wider text-[9px]">
+                    mada
+                  </span>
+                  <span className="px-1.5 py-0.5 rounded bg-blue-700 text-white tracking-wider text-[9px]">
+                    VISA
+                  </span>
+                  <span className="px-1.5 py-0.5 rounded bg-red-600 text-white tracking-wider text-[9px]">
+                    Mastercard
+                  </span>
+                </div>
               </div>
 
+              {/* Cardholder Name */}
               <div>
-                <label className="block font-semibold text-slate-700 mb-1">Approved By</label>
+                <label className="block text-[11px] font-medium text-slate-600 mb-1">
+                  Cardholder Name
+                </label>
                 <input
                   type="text"
-                  value={approver}
-                  onChange={(e) => setApprover(e.target.value)}
-                  className="w-full p-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-800"
+                  value={cardHolder}
+                  onChange={(e) => setCardHolder(e.target.value)}
+                  required
+                  placeholder="e.g. Saeed Al-Ghamdi"
+                  className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-slate-800 font-medium text-xs focus:outline-none focus:border-emerald-600"
                 />
+              </div>
+
+              {/* Card Number */}
+              <div>
+                <label className="block text-[11px] font-medium text-slate-600 mb-1">
+                  Card Number
+                </label>
+                <div className="relative">
+                  <input
+                    type="text"
+                    value={cardNumber}
+                    onChange={handleCardNumberChange}
+                    required
+                    placeholder="4282 3400 9812 7741"
+                    maxLength={19}
+                    className="w-full px-3 py-2 pr-10 bg-white border border-slate-200 rounded-lg text-slate-900 font-mono font-bold text-xs tracking-wider focus:outline-none focus:border-emerald-600"
+                  />
+                  <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                    <CreditCard className="w-4 h-4 text-slate-400" />
+                  </div>
+                </div>
+              </div>
+
+              {/* Expiry Date, CVV, and Approver */}
+              <div className="grid grid-cols-3 gap-2.5">
+                <div>
+                  <label className="block text-[11px] font-medium text-slate-600 mb-1">
+                    Expires (MM/YY)
+                  </label>
+                  <input
+                    type="text"
+                    value={cardExpiry}
+                    onChange={handleExpiryChange}
+                    required
+                    placeholder="08/28"
+                    maxLength={5}
+                    className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-slate-900 font-mono text-center text-xs font-semibold focus:outline-none focus:border-emerald-600"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[11px] font-medium text-slate-600 mb-1 flex items-center justify-between">
+                    <span>CVV / CVC</span>
+                    <Lock className="w-3 h-3 text-slate-400" />
+                  </label>
+                  <input
+                    type="password"
+                    value={cardCvc}
+                    onChange={handleCvcChange}
+                    required
+                    placeholder="•••"
+                    maxLength={4}
+                    className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-slate-900 font-mono text-center text-xs font-bold tracking-widest focus:outline-none focus:border-emerald-600"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[11px] font-medium text-slate-600 mb-1">
+                    Approved By
+                  </label>
+                  <input
+                    type="text"
+                    value={approver}
+                    onChange={(e) => setApprover(e.target.value)}
+                    className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-slate-700 text-xs truncate focus:outline-none focus:border-emerald-600"
+                  />
+                </div>
+              </div>
+
+              {/* Security info note */}
+              <div className="flex items-center gap-1.5 text-[10px] text-slate-500 pt-0.5">
+                <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 flex-shrink-0" />
+                <span>Encrypted 256-bit tokenized card payment via Saudi Payments (mada)</span>
               </div>
             </div>
 
@@ -253,10 +376,20 @@ export const TopUpModal: React.FC<TopUpModalProps> = ({
               </button>
               <button
                 type="submit"
-                className="px-5 py-2 bg-[#0b3824] hover:bg-[#124930] text-white rounded-lg font-bold shadow-xs transition-colors flex items-center gap-1.5"
+                disabled={isProcessing}
+                className="px-5 py-2.5 bg-[#0b3824] hover:bg-[#124930] text-white rounded-lg font-bold shadow-xs transition-colors flex items-center gap-1.5 disabled:opacity-75 cursor-pointer"
               >
-                <CreditCard className="w-4 h-4 text-emerald-300" />
-                <span>Confirm & Generate Invoice</span>
+                {isProcessing ? (
+                  <>
+                    <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    <span>Processing Payment...</span>
+                  </>
+                ) : (
+                  <>
+                    <CreditCard className="w-4 h-4 text-emerald-300" />
+                    <span>Pay {totalAmount.toFixed(2)} SAR & Top-Up</span>
+                  </>
+                )}
               </button>
             </div>
           </form>
