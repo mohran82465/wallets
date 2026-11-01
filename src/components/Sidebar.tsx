@@ -191,24 +191,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 )}
               </button>
 
-              <button
-                onClick={() => onSelectWalletType('vercel')}
-                className={`w-full text-left px-3 py-2 rounded-md text-xs font-medium transition-colors flex items-center justify-between ${
-                  currentWalletType === 'vercel'
-                    ? 'bg-[#22664b] text-white shadow-sm ring-1 ring-[#3ca87e]'
-                    : 'text-[#a2cfbc] hover:text-white hover:bg-[#144932]/60'
-                }`}
-              >
-                <div className="flex items-center gap-1.5">
-                  <svg className="w-3 h-3 fill-current" viewBox="0 0 24 24">
-                    <path d="M24 22.525H0l12-21.05 12 21.05z" />
-                  </svg>
-                  <span>{t.vercel_wallets}</span>
-                </div>
-                {currentWalletType === 'vercel' && (
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#5ce1a6]"></span>
-                )}
-              </button>
+            
             </div>
           )}
         </div>
