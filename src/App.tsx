@@ -42,7 +42,7 @@ export default function App() {
   const [lang, setLang] = useState<Language>('en');
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [currentWalletType, setCurrentWalletType] = useState<WalletType>('shomoos');
-  const [activeTab, setActiveTab] = useState<'wallets' | 'transactions' | 'audit'>('wallets');
+  const [activeTab, setActiveTab] = useState<'wallets' | 'transactions'>('wallets');
 
   // Core Data State
   const [shomoosWallets, setShomoosWallets] = useState<Wallet[]>(INITIAL_SHOMOOS_WALLETS);
@@ -225,7 +225,6 @@ export default function App() {
           lang={lang}
           onToggleLang={() => setLang(lang === 'en' ? 'ar' : 'en')}
           onOpenQuickTopUp={() => handleOpenTopUp()}
-          onOpenAuditTab={() => setActiveTab('audit')}
         />
 
         {/* Page Content Body */}
@@ -257,7 +256,7 @@ export default function App() {
             </p>
           </div>
 
-          {/* Navigation Tabs (Wallets, Transactions, Audit) */}
+          {/* Navigation Tabs (Wallets, Transactions) matching reference screenshot */}
           <div className="border-b border-slate-200 flex items-center justify-between">
             <div className="flex items-center gap-8 -mb-px">
               <button
@@ -289,34 +288,6 @@ export default function App() {
                 {activeTab === 'transactions' && (
                   <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#0b3824] rounded-full" />
                 )}
-              </button>
-
-              <button
-                onClick={() => setActiveTab('audit')}
-                className={`pb-3 text-sm font-semibold transition-all relative flex items-center gap-1.5 ${
-                  activeTab === 'audit'
-                    ? 'text-[#0b3824]'
-                    : 'text-slate-500 hover:text-slate-800'
-                }`}
-              >
-                <span>{t.tab_audit}</span>
-                <span className="text-[11px] px-1.5 py-0.2 rounded-full bg-slate-100 text-slate-600 font-mono">
-                  {auditLogs.length}
-                </span>
-                {activeTab === 'audit' && (
-                  <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#0b3824] rounded-full" />
-                )}
-              </button>
-            </div>
-
-            {/* Quick top-up button */}
-            <div className="hidden sm:flex items-center gap-2 pb-2">
-              <button
-                onClick={() => handleOpenTopUp()}
-                className="flex items-center gap-1.5 px-3 py-1.5 bg-[#0b3824] hover:bg-[#124930] text-white text-xs font-semibold rounded-lg shadow-xs transition-colors"
-              >
-                <Plus className="w-3.5 h-3.5" />
-                <span>Top-Up Wallet</span>
               </button>
             </div>
           </div>
@@ -413,9 +384,6 @@ export default function App() {
               onInitiateReversal={(txn) => handleOpenAdjustment(undefined, txn)}
             />
           )}
-
-          {/* TAB 3: AUDIT & INVOICES */}
-          {activeTab === 'audit' && <AuditTable auditLogs={auditLogs} lang={lang} />}
         </main>
       </div>
 

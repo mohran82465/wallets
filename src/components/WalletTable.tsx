@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Wallet, WalletType } from '../types/wallet';
 import { Language, TRANSLATIONS } from '../utils/translations';
-import { PlusCircle, ExternalLink, Zap, AlertCircle } from 'lucide-react';
+import { PlusCircle, ExternalLink, MoreVertical, Eye, AlertCircle } from 'lucide-react';
 
 interface WalletTableProps {
   wallets: Wallet[];
@@ -18,9 +18,9 @@ export const WalletTable: React.FC<WalletTableProps> = ({
   lang,
   onSelectWallet,
   onTopUpWallet,
-  onSimulateWallet,
 }) => {
   const t = TRANSLATIONS[lang];
+  const [openMenuCode, setOpenMenuCode] = useState<string | null>(null);
 
   const getStatusBadge = (status: Wallet['status']) => {
     switch (status) {
@@ -59,13 +59,12 @@ export const WalletTable: React.FC<WalletTableProps> = ({
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-xs border border-slate-200 overflow-hidden">
-      <div className="overflow-x-auto">
+    <div className="bg-white rounded-xl shadow-xs border border-slate-200 overflow-visible">
+      <div className="overflow-x-auto overflow-y-visible">
         <table className="w-full text-left border-collapse text-sm">
           <thead>
             <tr className="bg-[#edf2f7] text-slate-600 font-medium text-xs border-b border-slate-200 select-none">
               <th className="py-3 px-4 w-32">{t.wallet_code}</th>
-              <th className="py-3 px-4">{t.operator}</th>
               <th className="py-3 px-4">{t.property}</th>
               <th className="py-3 px-4 w-28 text-center">{t.status}</th>
 
@@ -97,14 +96,14 @@ export const WalletTable: React.FC<WalletTableProps> = ({
                 </>
               )}
 
-              <th className="py-3 px-4 text-center w-28">{t.actions}</th>
+              <th className="py-3 px-4 text-center w-20">{t.actions}</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
             {wallets.length === 0 ? (
               <tr>
                 <td
-                  colSpan={type === 'shomoos' ? 9 : 11}
+                  colSpan={type === 'shomoos' ? 8 : 10}
                   className="py-12 text-center text-slate-400 text-sm"
                 >
                   <AlertCircle className="w-6 h-6 mx-auto mb-2 text-slate-300" />
@@ -128,14 +127,10 @@ export const WalletTable: React.FC<WalletTableProps> = ({
                     </button>
                   </td>
 
-                  {/* Operator */}
-                  <td className="py-3.5 px-4 text-slate-800 font-medium whitespace-nowrap">
-                    {wallet.operator}
-                  </td>
-
                   {/* Property */}
-                  <td className="py-3.5 px-4 text-slate-600 whitespace-nowrap">
-                    {wallet.property_name}
+                  <td className="py-3.5 px-4 text-slate-800 font-medium whitespace-nowrap">
+                    <div>{wallet.property_name}</div>
+                    <div className="text-[11px] text-slate-400 font-normal">{wallet.operator}</div>
                   </td>
 
                   {/* Status Badge */}
@@ -214,16 +209,53 @@ export const WalletTable: React.FC<WalletTableProps> = ({
                     </>
                   )}
 
-                  {/* Actions */}
-                  <td className="py-3.5 px-4 text-center">
-                    <div className="flex items-center justify-center opacity-90 group-hover:opacity-100">
+                  {/* Actions in Vertical Ellipsis */}
+                  <td className="py-3.5 px-4 text-center relative">
+                    <div className="relative inline-block text-left">
                       <button
-                        onClick={() => onTopUpWallet(wallet)}
-                        className="p-1.5 text-emerald-700 bg-emerald-50 hover:bg-emerald-100 rounded-md transition-colors"
-                        title={t.top_up_btn}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setOpenMenuCode(
+                            openMenuCode === wallet.wallet_code ? null : wallet.wallet_code
+                          );
+                        }}
+                        className="p-1.5 text-slate-500 hover:text-slate-800 hover:bg-slate-100 rounded-lg transition-colors cursor-pointer"
+                        title="Actions"
                       >
-                        <PlusCircle className="w-3.5 h-3.5" />
+                        <MoreVertical className="w-4 h-4" />
                       </button>
+
+                      {openMenuCode === wallet.wallet_code && (
+                        <>
+                          <div
+                            className="fixed inset-0 z-20"
+                            onClick={() => setOpenMenuCode(null)}
+                          />
+                          <div className="absolute right-0 mt-1 w-44 bg-white rounded-xl shadow-xl border border-slate-200 py-1.5 z-30 animate-in fade-in zoom-in-95 duration-100 text-left">
+                            <button
+                              onClick={() => {
+                                setOpenMenuCode(null);
+                                onTopUpWallet(wallet);
+                              }}
+                              className="w-full px-3 py-2 text-xs font-medium text-slate-700 hover:bg-emerald-50 hover:text-emerald-800 flex items-center gap-2 transition-colors cursor-pointer"
+                            >
+                              <PlusCircle className="w-3.5 h-3.5 text-emerald-600" />
+                              <span>Top-Up Wallet</span>
+                            </button>
+
+                            <button
+                              onClick={() => {
+                                setOpenMenuCode(null);
+                                onSelectWallet(wallet);
+                              }}
+                              className="w-full px-3 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50 flex items-center gap-2 transition-colors cursor-pointer"
+                            >
+                              <Eye className="w-3.5 h-3.5 text-slate-500" />
+                              <span>View Details</span>
+                            </button>
+                          </div>
+                        </>
+                      )}
                     </div>
                   </td>
                 </tr>

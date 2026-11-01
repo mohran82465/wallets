@@ -21,7 +21,7 @@ interface HeaderProps {
   onToggleLang: () => void;
   onOpenQuickTopUp: () => void;
   onOpenSimulation?: () => void;
-  onOpenAuditTab: () => void;
+  onOpenAuditTab?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -93,7 +93,7 @@ export const Header: React.FC<HeaderProps> = ({
                 <button
                   onClick={() => {
                     setShowQuickActions(false);
-                    onOpenAuditTab();
+                    onOpenAuditTab?.();
                   }}
                   className="w-full text-left px-3 py-2 text-xs text-slate-700 hover:bg-emerald-50 hover:text-emerald-800 rounded-lg flex items-center gap-2.5 transition-colors"
                 >
